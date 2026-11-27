@@ -1,6 +1,6 @@
 #!/usr/bin/env node
-// Builds the /study tutorial pages for the ITCode cover site (the front page links to them; before
-// this they 404'd). Real, readable tutorials in the front page's style, so the cover holds up when a
+// Builds the /study tutorial pages for the Ashcobe Academy cover site (Applied Computing course notes;
+// the sitemap lists them). Real, readable tutorials in the front page's style, so the cover holds up when a
 // crawler follows the links. Run: node study/_build.mjs  (writes study/<slug>.html, robots.txt,
 // sitemap.xml at the repo root).
 import fs from 'node:fs';
@@ -124,34 +124,41 @@ const T = {
   ]],
 };
 
-const nav = `<nav>\n  <a href="/">Home</a>\n  <a href="/#programming">Programming</a>\n  <a href="/#networking">Networking</a>\n  <a href="/#other">Other</a>\n</nav>`;
+const nav = `<nav>\n  <a href="/">About</a>\n  <a href="/">Schools</a>\n  <a href="/">Catalogue</a>\n  <a href="/">Calendar</a>\n</nav>`;
+// The cover page's look: EB Garamond and Pinyon Script, green, brass and cream.
+const FONTS = '<link rel="preconnect" href="https://fonts.googleapis.com">\n  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>\n  <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Pinyon+Script&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">';
 const STYLE = `
+  :root { --green: #1f3329; --brass: #a07a36; --cream: #f5f3ee; --paper: #e9e6dc; --ink: #1b1f1c; --soft: #6a6e68; --line: rgba(31,51,41,.16); }
   * { box-sizing: border-box; }
   html { scroll-behavior: smooth; }
-  body { margin: 0; background: #f7f7f5; color: #222; font-family: Arial, Helvetica, sans-serif; line-height: 1.6; }
+  body { margin: 0; background: var(--cream); color: var(--ink); font-family: 'Inter', sans-serif; font-weight: 300; font-size: 16px; line-height: 1.7; -webkit-font-smoothing: antialiased; }
   a { color: inherit; text-decoration: none; }
-  header { height: 62px; background: #fff; border-bottom: 1px solid #ddd; display: flex; align-items: center; padding: 0 32px; }
-  .header-inner { width: 100%; max-width: 1100px; margin: auto; display: flex; align-items: center; justify-content: space-between; }
-  .logo { font-size: 21px; font-weight: bold; letter-spacing: -0.5px; }
-  .logo span { color: #2864d7; }
-  nav { display: flex; gap: 24px; font-size: 14px; color: #555; }
-  nav a:hover { color: #111; }
-  main { max-width: 760px; margin: auto; padding: 50px 25px 80px; }
-  .crumb { font-size: 13px; color: #888; margin-bottom: 18px; }
-  .crumb a:hover { color: #111; }
-  .label { display: block; margin-bottom: 10px; color: #888; font-size: 11px; text-transform: uppercase; letter-spacing: 0.7px; }
-  h1 { margin: 0 0 14px; font-size: 38px; line-height: 1.15; letter-spacing: -1px; }
-  .lead { margin: 0 0 40px; color: #555; font-size: 18px; }
-  h2 { margin: 40px 0 12px; font-size: 23px; letter-spacing: -0.3px; }
+  header { border-bottom: 1px solid var(--line); padding: 18px 5vw; }
+  .header-inner { max-width: 1100px; margin: auto; display: flex; align-items: center; justify-content: space-between; gap: 20px; }
+  .logo { font-family: 'Pinyon Script', cursive; font-size: 32px; color: var(--green); line-height: 1; }
+  .logo small { font-family: 'Inter', sans-serif; font-size: 10px; letter-spacing: .22em; text-transform: uppercase; color: var(--soft); margin-left: 10px; vertical-align: middle; }
+  nav { display: flex; gap: 26px; font-size: 13px; color: var(--green); }
+  nav a:hover { color: var(--brass); }
+  main { max-width: 760px; margin: auto; padding: 56px 5vw 90px; }
+  .crumb { font-size: 12px; color: var(--soft); margin-bottom: 22px; }
+  .crumb a:hover { color: var(--green); }
+  .label { display: block; margin-bottom: 10px; color: var(--brass); font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: .26em; }
+  h1 { margin: 0 0 16px; font-family: 'EB Garamond', serif; font-weight: 400; font-size: clamp(36px, 5vw, 54px); line-height: 1.08; color: var(--green); }
+  .lead { margin: 0 0 42px; color: var(--soft); font-size: 18px; }
+  h2 { margin: 44px 0 12px; font-family: 'EB Garamond', serif; font-weight: 500; font-size: 28px; line-height: 1.2; color: var(--green); }
   p { margin: 0 0 14px; }
-  code { background: #eceae6; padding: 1px 5px; border-radius: 3px; font-size: 90%; }
-  pre { background: #20252b; color: #e6e6e6; padding: 16px 18px; border-radius: 4px; overflow: auto; }
-  pre code { background: none; padding: 0; color: inherit; font-size: 13px; line-height: 1.5; }
-  .more { margin-top: 55px; padding-top: 22px; border-top: 1px solid #ddd; }
-  .more a { color: #2864d7; font-weight: bold; font-size: 14px; }
-  footer { border-top: 1px solid #ddd; background: white; padding: 28px 25px; color: #777; font-size: 13px; }
-  .footer-inner { max-width: 1100px; margin: auto; display: flex; justify-content: space-between; }
-  @media (max-width: 700px) { header { padding: 0 18px; } nav { display: none; } main { padding: 36px 18px 60px; } h1 { font-size: 30px; } .footer-inner { flex-direction: column; gap: 5px; } }`;
+  b { font-weight: 500; }
+  code { background: var(--paper); padding: 1px 5px; border-radius: 3px; font-size: 88%; }
+  pre { background: var(--green); color: #e7e2d4; padding: 16px 18px; overflow: auto; }
+  pre code { background: none; padding: 0; color: inherit; font-size: 13px; line-height: 1.55; }
+  .more { margin-top: 56px; padding-top: 22px; border-top: 1px solid var(--line); font-size: 14px; }
+  .more b { color: var(--green); }
+  .more a { color: var(--brass); font-weight: 500; }
+  .more a:hover { text-decoration: underline; }
+  footer { background: var(--ink); color: #bfc8c1; padding: 30px 5vw; font-size: 13px; }
+  .footer-inner { max-width: 1100px; margin: auto; display: flex; justify-content: space-between; gap: 10px; }
+  .footer-inner em { font-family: 'EB Garamond', serif; font-size: 16px; color: #d4b679; }
+  @media (max-width: 700px) { nav { display: none; } .footer-inner { flex-direction: column; } }`;
 
 const slugs = Object.keys(T);
 function page(slug) {
@@ -164,7 +171,8 @@ function page(slug) {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>${title.replace(/&amp;/g, '&')} tutorial - ITCode</title>
+  <title>${title.replace(/&amp;/g, '&')} - Applied Computing notes - Ashcobe Academy</title>
+  ${FONTS}
   <meta name="description" content="${title.replace(/&amp;/g, '&')}: ${lead.slice(0, 120)}">
   <link rel="canonical" href="${SITE}/study/${slug}.html">
   <style>${STYLE}
@@ -173,12 +181,12 @@ function page(slug) {
 <body>
 <header>
   <div class="header-inner">
-    <a href="/" class="logo"><span>IT</span>Code</a>
+    <a href="/" class="logo">Ashcobe<small>Academy · est. 2009</small></a>
     ${nav}
   </div>
 </header>
 <main>
-  <div class="crumb"><a href="/">Home</a> › <a href="/#${cat.toLowerCase()}">${cat}</a> › ${title}</div>
+  <div class="crumb"><a href="/">Home</a> › Applied Computing › ${cat} › ${title}</div>
   <span class="label">${cat}</span>
   <h1>${title}</h1>
   <p class="lead">${lead}</p>
@@ -188,7 +196,7 @@ ${body}
   <div class="more"><b>Keep reading:</b> ${more}</div>
 </main>
 <footer>
-  <div class="footer-inner"><div>© ITCode</div><div>Tutorials for people learning to build things.</div></div>
+  <div class="footer-inner"><div>© 2009–2026 Ashcobe Academy · School of Applied Computing</div><div><em>Scientia in usu</em></div></div>
 </footer>
 </body>
 </html>
@@ -198,7 +206,7 @@ ${body}
 for (const slug of slugs) fs.writeFileSync(path.join(HERE, `${slug}.html`), page(slug));
 
 // robots.txt: allow everything, every crawler.
-fs.writeFileSync(path.join(ROOT, 'robots.txt'), `# ITCode — all crawlers welcome, everything allowed.\nUser-agent: *\nAllow: /\n\nSitemap: ${SITE}/sitemap.xml\n`);
+fs.writeFileSync(path.join(ROOT, 'robots.txt'), `# Ashcobe Academy: all crawlers welcome, everything allowed.\nUser-agent: *\nAllow: /\n\nSitemap: ${SITE}/sitemap.xml\n`);
 
 // sitemap: the front page and every tutorial.
 const today = new Date().toISOString().slice(0, 10);
