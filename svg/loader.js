@@ -100,20 +100,14 @@ const hex = (b) => Array.from(new Uint8Array(b), (x) => x.toString(16).padStart(
 // not once per file. The relay that last worked goes first.
 const failed = new Set();
 let preferred = null;
-// The relays race to connect: the first starts at once, and each HEDGE_MS without a TLS handshake
-// done (or a failure) starts the next one too. The first to finish its handshake gets the request
-// and the others are closed, so a dead or slow relay costs HEDGE_MS instead of its whole 3 s.
-const HEDGE_MS = 500;
+// The relays race to connect: all of them start at once, and the first to finish its TLS handshake
+// gets the request (purely the fastest); the others are closed and kept for a retry.
 function race(queue, name, progress, range) {
   return new Promise((resolve) => {
     const live = new Map(); // relay -> AbortController
-    let winner = null, timer = 0, last = null;
-    const finish = (v) => { clearTimeout(timer); resolve(v); };
-    const launch = () => {
-      clearTimeout(timer);
-      if (winner) return;
-      const relay = queue.shift();
-      if (!relay) { if (!live.size) finish({ last }); return; }
+    let winner = null, last = null, done = false;
+    const finish = (v) => { if (!done) { done = true; resolve(v); } };
+    const start = (relay) => {
       const ctrl = new AbortController();
       live.set(relay, ctrl);
       httpsGet(relay, base() + name, (n, t) => progress?.(n, t), {
@@ -122,7 +116,6 @@ function race(queue, name, progress, range) {
         onConnect: () => {
           if (winner) { if (winner !== relay) ctrl.abort(); return; } // a redirect connects the winner again
           winner = relay;
-          clearTimeout(timer);
           for (const [r, c] of live) if (r !== relay) { c.abort(); queue.unshift(r); } // not their fault: kept for a retry
         },
       }).then((r) => {
@@ -138,22 +131,30 @@ function race(queue, name, progress, range) {
         if (!/GitHub answered/.test(String(e?.message))) failed.add(relay); // GitHub's own answer isn't the relay's fault
         console.warn(`[proxyfox.svg] ${name} not through ${relay}: ${e?.message || e}`);
         if (winner === relay) finish({ retry: true, last }); // failed after it connected: race the rest again
-        else launch();
+        else if (!winner && !live.size) finish({ last }); // none of them connected
       });
-      timer = setTimeout(launch, HEDGE_MS);
     };
-    launch();
+    const all = queue.splice(0);
+    if (!all.length) return finish({ last });
+    for (const relay of all) start(relay);
   });
 }
+// The relays for a file: the one that last worked (this page load) on its own, then every relay of
+// the chosen filter at once, then, if none of those got it, every other relay at once.
 async function viaRelays(name, progress, range) {
-  const queue = (TEST?.relays || relays()).filter((r) => !failed.has(r));
-  if (preferred && queue.includes(preferred)) queue.unshift(...queue.splice(queue.indexOf(preferred), 1));
+  const all = (TEST?.relays || relays()).filter((r) => !failed.has(r));
+  const mine = new Set(filters()[chosen] || []);
+  let rounds = TEST ? [all] : [all.filter((r) => mine.has(r)), all.filter((r) => !mine.has(r))];
+  if (preferred && all.includes(preferred)) rounds = [[preferred], ...rounds.map((q) => q.filter((r) => r !== preferred))];
   let last = new Error('no relay left to try');
-  while (queue.length) {
-    const r = await race(queue, name, progress, range);
-    if (r.body) return r.body;
-    last = r.last;
-    if (!r.retry) break;
+  for (const round of rounds.filter((q) => q.length)) {
+    const queue = round.filter((r) => !failed.has(r));
+    while (queue.length) {
+      const r = await race(queue, name, progress, range);
+      if (r.body) return r.body;
+      if (r.last) last = r.last;
+      if (!r.retry) break;
+    }
   }
   throw last;
 }
