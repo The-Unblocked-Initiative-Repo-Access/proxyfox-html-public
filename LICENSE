@@ -6,14 +6,31 @@ This program is free software: you can redistribute it and/or modify it under th
 GNU Affero General Public License as published by the Free Software Foundation, version 3, with
 the additional terms below.
 
-Additional terms, under section 7(b) of the GNU Affero General Public License version 3:
+Additional terms, under sections 7(b) and 7(c) of the GNU Affero General Public License version 3:
   1. Any copy of this program, and any modified version of it or work based on it, must keep the
-     author attribution "Made by CodedbyZach, zaka13alt and cdrlol" visible on its launch page and in
-     its credits (the Licenses section at the bottom of the page).
+     author attribution "Made by CodedbyZach, zaka13alt and cdrlol" clearly visible on its launch page
+     and in its credits (the Licenses section at the bottom of the page).
   2. As part of that author attribution, any copy of this program, and any modified version of it or
-     work based on it, must keep the authors' Discord button on its launch page: visible, working, and
-     linking to the authors' Discord server, https://discord.gg/przyfox, where the authors are reached.
-     It may be restyled, but not hidden, removed, covered, disabled or pointed anywhere else.
+     work based on it, must keep the authors' Discord button on its launch page: clearly visible,
+     working, and linking to the authors' Discord server, https://discord.gg/przyfox, where the authors
+     are reached. It may be restyled, but not hidden, removed, covered, disabled or pointed anywhere
+     else.
+  3. So that its origin is not misrepresented, any copy of this program, and any modified version of
+     it or work based on it, must clearly name Proxyfox on its launch page: either as its name, or, if
+     it goes by another name, with the words "Based on Proxyfox" (or "Built from Proxyfox") next to
+     that name.
+
+"Clearly visible", in these terms: on the launch page, shown as the page first appears, without
+scrolling, clicking, hovering or opening anything (the credits only need to be in their section, as
+they are here); in easily readable text, not much smaller than the page's ordinary text, in a color
+that contrasts with what is behind it; and not covered, faded, shrunk, cut off, placed off screen or
+shown only briefly.
+
+Notice: the authors run services that copies of this program use, such as the WISP relays, the
+pr0xyfox.dev site and its update and site-check servers. The authors may refuse, limit or end any
+site's or domain's access to those services, at any time, if they believe it breaks these terms. A
+copy on such a site may then stop working or refuse to run. This notice is not an additional term
+on the program: it describes how the authors run their own services.
 
 This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
 even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
