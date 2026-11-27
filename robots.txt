@@ -1,4 +1,4 @@
-# ITCode — all crawlers welcome, everything allowed.
+# Ashcobe Academy: all crawlers welcome, everything allowed.
 User-agent: *
 Allow: /
 
