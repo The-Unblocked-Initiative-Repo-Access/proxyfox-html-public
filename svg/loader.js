@@ -474,8 +474,61 @@ addEventListener('message', async (e) => {
   }
 });
 
+// ------------------------------------------------------------------- activity --
+// The activity report (pr0xyfox.dev's gate, /v, kind loader): every open of this loader, wherever it
+// runs (pr0xyfox.dev, a BYOD domain, a copy on another site, a file), with the exact page it is on
+// (no fragment, and no query parameter that could be a secret) and the visitor's IP for the map.
+// Sent through the relays like the download (a network that blocks pr0xyfox.dev doesn't stop it),
+// else straight from the page. Proxyfox reports again when it starts (kind app).
+const REPORT = 'https://pr0xyfox.dev/v';
+const SECRET_PARAM = /code|token|key|pass|pwd|secret|sess|auth|sig|otp|pin|jwt|cred|login|mail|user|account|phone/i;
+function pageAddress() {
+  let href = '';
+  try { if (window.parent !== window) href = window.parent.location.href; } catch {} // a copy that frames this one
+  if (!href) href = location.href;
+  try {
+    const u = new URL(href);
+    if (u.protocol !== 'https:' && u.protocol !== 'http:') return '';
+    for (const k of [...new Set(u.searchParams.keys())]) if (SECRET_PARAM.test(k)) u.searchParams.delete(k);
+    return u.origin + u.pathname + u.search;
+  } catch { return ''; }
+}
+// The visitor's IP as websites see it: asked straight from this page (through a relay it would be the
+// relay's), from several "what is my IP" sites at once; the first good answer wins.
+const IP_SITES = ['https://api.ipify.org?format=json', 'https://api64.ipify.org?format=json', 'https://ipinfo.io/json', 'https://api.ip.sb/jsonip', 'https://api.seeip.org/jsonip', 'https://ipwho.is/'];
+async function lookUpIp() {
+  try {
+    return await Promise.any(IP_SITES.map(async (url) => {
+      const res = await fetch(url, { cache: 'no-store', credentials: 'omit', signal: AbortSignal.timeout(6000) });
+      const ip = res.ok ? String((await res.json())?.ip || '') : '';
+      if (!/^[0-9a-f.:]{3,45}$/i.test(ip)) throw new Error('no IP');
+      return ip;
+    }));
+  } catch {
+    return '';
+  }
+}
+async function reportOpen() {
+  if (TEST) return;
+  try {
+    const page = pageAddress();
+    const src = page ? new URL(page).hostname : location.protocol === 'file:' ? 'file' : 'loader';
+    const url = `${REPORT}?${new URLSearchParams({ kind: 'loader', ip: await lookUpIp(), src, page })}`;
+    for (const relay of relays().slice(0, 3)) {
+      try {
+        const r = await httpsGet(relay, url, null, { signal: AbortSignal.timeout(15000) });
+        if (r.status < 500) return;
+      } catch {}
+    }
+    await fetch(url, { cache: 'no-store', credentials: 'omit' });
+  } catch (e) {
+    console.warn('[proxyfox.svg] activity report not sent:', e?.message || e);
+  }
+}
+
 async function start() {
   await registerAppWorker();
+  void reportOpen(); // not after the filter question: someone who never answers it is counted too
   await chooseFilter();
   const cache = await openCache();
   const kept = cache ? await cache.match(KEY()).catch(() => null) : null;
